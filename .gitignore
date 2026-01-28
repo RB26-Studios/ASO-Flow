@@ -45,6 +45,9 @@ next-env.d.ts
 !.vscode/extensions.json
 !.vscode/*.code-snippets
 
+# Firebase Studio
+.idx
+
 # Local History for Visual Studio Code
 .history/
 
@@ -55,5 +58,6 @@ next-env.d.ts
 # Ignore all local history of files
 .history
 .ionide
+
 
 # End of https://www.toptal.com/developers/gitignore/api/visualstudiocode,nextjs
