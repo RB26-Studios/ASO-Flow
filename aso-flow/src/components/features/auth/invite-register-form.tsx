@@ -12,11 +12,12 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "@/src/components/ui/input"
 import { Label } from "@/src/components/ui/label"
 
+// O .optional() foi adicionado aqui no inviteCode para bater perfeitamente com o backend
 const registerSchema = z.object({
   email: z.string().email(),
   password: z.string().min(6, "Mínimo de 6 caracteres"),
   confirmPassword: z.string(),
-  inviteCode: z.string(),
+  inviteCode: z.string().optional(), 
 }).refine((data) => data.password === data.confirmPassword, {
   message: "As senhas não coincidem",
   path: ["confirmPassword"],
