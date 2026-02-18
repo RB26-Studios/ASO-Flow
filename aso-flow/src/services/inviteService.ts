@@ -7,8 +7,8 @@ import { create } from "domain"
 
 // Esquema de validação para a criação do convite
 const createInviteSchema = z.object({
-    email: z.string().email("Insira um e-mail válido para o convite."),
-    role: z.enum(['ADMIN', 'OPERADOR']), 
+  email: z.string().email("Insira um e-mail válido para o convite."),
+  role: z.enum(['ADMIN', 'OPERADOR']), 
 })
 
 export type CreateInviteFormData = z.infer<typeof createInviteSchema>

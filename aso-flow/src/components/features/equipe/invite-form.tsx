@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { createInviteAction, CreateInviteFormData } from "@/src/services/inviteService"
+import { createInviteAction } from "@/src/services/inviteService"
 import { z } from "zod"
 import { toast } from "sonner"
 import { Copy } from "lucide-react"
@@ -15,14 +15,16 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 
 const createInviteSchema = z.object({
   email: z.string().email("Insira um e-mail válido."),
-  role: z.enum(['ADMIN', 'OPERADOR']).default('OPERADOR'),
+  role: z.enum(['ADMIN', 'OPERADOR']),
 })
+
+type InviteFormValues = z.infer<typeof createInviteSchema>
 
 export function InviteForm() {
   const [isLoading, setIsLoading] = useState(false)
   const [generatedLink, setGeneratedLink] = useState<string | null>(null)
 
-  const { register, handleSubmit, formState: { errors }, reset } = useForm<CreateInviteFormData>({
+  const { register, handleSubmit, formState: { errors }, reset } = useForm<InviteFormValues>({
     resolver: zodResolver(createInviteSchema),
     defaultValues: {
       email: "",
@@ -30,7 +32,7 @@ export function InviteForm() {
     }
   })
 
-  async function onSubmit(data: CreateInviteFormData) {
+  async function onSubmit(data: InviteFormValues) {
     setIsLoading(true)
     setGeneratedLink(null)
 
@@ -41,11 +43,9 @@ export function InviteForm() {
     } else if (response?.inviteId) {
       toast.success("Convite gerado com sucesso!")
       
-      // Monta o link mágico com base no domínio atual (localhost:3000 ou o domínio em produção)
       const link = `${window.location.origin}/register?code=${response.inviteId}`
       setGeneratedLink(link)
       
-      // Limpa o formulário para o próximo convite
       reset()
     }
     
@@ -86,7 +86,6 @@ export function InviteForm() {
 
             <div className="grid gap-2">
               <Label htmlFor="role">Nível de Acesso *</Label>
-              {/* Usando um select nativo estilizado para manter a simplicidade nesta fase */}
               <select 
                 id="role" 
                 {...register("role")} 
@@ -101,7 +100,6 @@ export function InviteForm() {
           </div>
         </form>
 
-        {/* Área de Sucesso: Só aparece se o link for gerado */}
         {generatedLink && (
           <div className="p-4 mt-4 bg-green-50 border border-green-200 rounded-lg space-y-3">
             <p className="text-sm text-green-800 font-medium">Convite gerado! Envie este link para o utilizador:</p>
