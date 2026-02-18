@@ -1,6 +1,6 @@
 import { Metadata } from "next"
 import { getOrganizationAction } from "@/src/services/organizationService"
-import { OrganizationManager } from "@/src/components/features/pages/organization-manager"
+import { OrganizationManager } from "@/src/components/features/organization/organization-manager"
 
 export const metadata: Metadata = {
   title: "Configurações da Empresa",

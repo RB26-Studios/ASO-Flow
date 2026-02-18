@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from "react"
-import { OrganizationForm } from "@/src/components/features/pages/organization-form"
+import { OrganizationForm } from "@/src/components/features/organization/organization-form"
 import { OrganizationFormData } from "@/src/services/organizationService"
 import { Button } from "@/src/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/src/components/ui/card"
