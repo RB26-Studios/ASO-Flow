@@ -1,4 +1,7 @@
 import { checkDatabaseConnection } from "@/src/server/db/test-connection"
+import { Button } from "../components/ui/button"
+import Link from "next/link"
+
 
 export default async function Home() {
   // Chamada direta ao Backend (Server Action/Function)
@@ -16,6 +19,23 @@ export default async function Home() {
       {!status.success && (
         <p className="text-red-500">Verifique seu arquivo .env.local</p>
       )}
+      <div className="flex flex-grid gap-4 items-center justify-center">
+      <div className="flex gap-4 items-center justify-center">
+          <Link href="/login">
+            <Button className="w-full font-bold">
+              Login
+            </Button>
+          </Link>
+
+          <Link href="/register">
+            <Button className="w-full font-bold">
+              Cadastro
+            </Button>
+          </Link>
+        </div>
+
+      </div>
+
     </div>
   )
 }
