@@ -11,10 +11,10 @@ const loginSchema = z.object({
 })
 
 const registerSchema = z.object({
-  email: z.string().email("E-mail inválido"),
+  email: z.string().email(),
   password: z.string().min(6, "Mínimo de 6 caracteres"),
   confirmPassword: z.string(),
-  inviteCode: z.string().optional(),
+  inviteCode: z.string().optional(), // A CORREÇÃO ESTÁ AQUI: Adicionamos o .optional()
 }).refine((data) => data.password === data.confirmPassword, {
   message: "As senhas não coincidem",
   path: ["confirmPassword"],
