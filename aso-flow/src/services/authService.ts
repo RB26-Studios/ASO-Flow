@@ -2,82 +2,88 @@
 
 import { createClient } from "@/src/lib/supabase/server"
 import { redirect } from "next/navigation"
-import { success, z } from "zod"
+import { z } from "zod"
 
-// 1. Definição do Schema de Validação (Regras do Zod)
+/* ======================================================
+   LOGIN
+====================================================== */
+
+// 1️⃣ Schema de validação do login
 const loginSchema = z.object({
   email: z.string().email("Formato de e-mail inválido"),
   password: z.string().min(6, "A senha deve ter no mínimo 6 caracteres"),
 })
 
-// 2. Exportamos o tipo para usar no formulário do Frontend
+// 2️⃣ Tipo exportado para o frontend
 export type LoginFormData = z.infer<typeof loginSchema>
 
-// 3. A Server Action de Login
+// 3️⃣ Server Action de Login
 export async function loginAction(data: LoginFormData) {
-  // Validação no Servidor (Segurança extra contra bypass de frontend)
+  // Validação no servidor
   const result = loginSchema.safeParse(data)
-  
+
   if (!result.success) {
     return { error: "Dados inválidos. Verifique os campos." }
   }
 
   const supabase = await createClient()
 
-  // Tenta fazer o login no Supabase Auth
+  // Tentativa de login
   const { error } = await supabase.auth.signInWithPassword({
-    email: data.email,
-    password: data.password,
+    email: result.data.email,
+    password: result.data.password,
   })
 
   if (error) {
-    console.error("Erro de login:", error.message) // Log para debug no servidor
+    console.error("Erro de login:", error.message)
     return { error: "E-mail ou senha incorretos." }
   }
 
-  // Se der sucesso, redireciona para a área administrativa
-  // O 'redirect' no Next.js Server Actions funciona como um 'return' que joga o usuário para outra rota
+  // Se sucesso, redireciona
   redirect("/admin")
 }
 
-// Schema para Cadastro
+
+/* ======================================================
+   CADASTRO
+====================================================== */
+
+// 1️⃣ Schema de validação do cadastro
 const registerSchema = z.object({
-    email: z.string().email("E-mail invalido"),
-    password: z.string().min(6, "A senha deve ter no minimo 6 caracteres"),
-    confirmPassword: z.string(),
+  email: z.string().email("E-mail inválido"),
+  password: z.string().min(6, "A senha deve ter no mínimo 6 caracteres"),
+  confirmPassword: z.string(),
 }).refine((data) => data.password === data.confirmPassword, {
-    message: "As senhas não coincidem",
-    path: ["confirmPassword"],
+  message: "As senhas não coincidem",
+  path: ["confirmPassword"],
 })
 
+// 2️⃣ Tipo exportado para o frontend
 export type RegisterFormData = z.infer<typeof registerSchema>
 
-// Sever Action de Cadastro
-export async function registerAction(data: RegisterFormData){
-    const result = registerSchema.safeParse(data)
+// 3️⃣ Server Action de Cadastro
+export async function registerAction(data: RegisterFormData) {
+  const result = registerSchema.safeParse(data)
 
-    if(!result.success){
-        return {
-            error: "Dados invalidos."
-        }
-    }
+  if (!result.success) {
+    return { error: "Dados inválidos. Verifique os campos." }
+  }
 
-    const supabase = await createClient()
+  const supabase = await createClient()
 
-    const{ error } = await supabase.auth.signUp({
-        email: data.email,
-        password: data.password,
-        options: {
-          emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/callback`,
-        }
-    })
+  const { error } = await supabase.auth.signUp({
+    email: result.data.email,
+    password: result.data.password,
+    options: {
+      emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/callback`,
+    },
+  })
 
-    if(error){
-      console.error("Erro de cadastro:", error.message)
-      return{error: error.message}
-    }
+  if (error) {
+    console.error("Erro de cadastro:", error.message)
+    return { error: error.message }
+  }
 
-    return{
-      success: true
-    }
+  // Redireciona para login após cadastro
+  redirect("/login")
 }
