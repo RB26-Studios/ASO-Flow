@@ -1,6 +1,6 @@
 'use server'
 
-import { createClient } from "../lib/supabase/client"  
+import { createClient } from "../lib/supabase/server"  
 import { z } from "zod"
 import { revalidatePath } from "next/cache"
 
@@ -14,7 +14,7 @@ const organizationSchema = z.object({
     tech_responsible_register: z.string().optional(),
     email: z.string().email("E-mail inválido").optional(),
     phone: z.string().optional(),
-    aderess: z.string().optional(),
+    address: z.string().optional(),
 })
 
 export type OrganizationFormData = z.infer<typeof organizationSchema>
@@ -34,6 +34,12 @@ export async function upsertOrganizationAction(data: OrganizationFormData){
         ...data,
     }
 
+    // Se o ID vier vazio do formulário, removemos ele do envio
+    // Assim o Supabase entende que é uma criação (INSERT) e gera o UUID sozinho
+    if (!payload.id) {
+        delete payload.id;
+    }
+
     // Faz o Upsert (Atualiza se tiver ID, cria se não tiver)
     const { data: org, error } = await supabase
         .from('organizations')
@@ -48,14 +54,15 @@ export async function upsertOrganizationAction(data: OrganizationFormData){
         }
     }
 
-    // Atualiza o perfil do utilizador para o vincular a esta nova empresa
-    await supabase
-        .from('profiles')
-        .update({ organization_id: org.id})
-        .eq('id', user.id)
-    
-    // Atualiza a cache da página para mostrar os dados novos imediatamente
-    revalidatePath('/admin/configuracoes')
+    const { error: profileError } = await supabase
+    .from('profiles')
+    .update({ organization_id: org.id})
+    .eq('id', user.id)
+
+    if (profileError) {
+        console.error("ERRO AO ATUALIZAR PERFIL: ", profileError);
+        return { error: "Organização criada, mas falhou ao vincular ao seu perfil." }
+    }
 
     return{
         success: true, org
