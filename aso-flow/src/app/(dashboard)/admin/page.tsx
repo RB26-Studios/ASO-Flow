@@ -1,6 +1,5 @@
 import { Metadata } from "next"
 import { getOrganizationAction } from "@/src/services/organizationService"
-import { OrganizationManager } from "@/src/components/features/pages/organization-manager"
 import Link from "next/link"
 import { Button } from "@/src/components/ui/button"
 
