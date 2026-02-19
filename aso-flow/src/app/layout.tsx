@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "sonner";
+import { Header } from "@/src/components/layout/Header";
+import { Footer } from "@/src/components/layout/Footer";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -21,6 +23,7 @@ export const metadata: Metadata = {
   description: "Sistema de Gestão de Saúde Ocupacional",
 };
 
+// layout.tsx
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -29,10 +32,15 @@ export default function RootLayout({
   return (
     <html lang="pt-br">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col bg-[#E0E2E2]`}
       >
-        {children}
+        <Header />
+        {/* O main com flex-1 empurra o footer para o fim da tela */}
+        <main className="flex-1 flex flex-col">
+          {children}
+        </main>
         <Toaster richColors position="top-right" />
+        <Footer />
       </body>
     </html>
   );
