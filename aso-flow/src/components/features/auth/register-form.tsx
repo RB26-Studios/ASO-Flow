@@ -45,7 +45,7 @@ export function RegisterForm() {
     }
 
     return(
-        <div className="flex h-screen w-full items-center justify-center bg-slate-50 px-4">
+        <div className="flex-1 flex flex-col items-center justify-center p-8 gap-4">
             <Card className="w-full max-w-sm">
                 <CardHeader>
                     <CardTitle className="text-2xl text-center">ASO FLow</CardTitle>
