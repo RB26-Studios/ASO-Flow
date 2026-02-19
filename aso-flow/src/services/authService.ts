@@ -35,7 +35,7 @@ export async function loginAction(data: LoginFormData) {
   })
 
   if (error) return { error: "E-mail ou senha incorretos." }
-  redirect("/admin")
+  redirect("/home")
 }
 
 export async function registerAction(data: RegisterFormData) {
