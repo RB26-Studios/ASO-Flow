@@ -29,18 +29,14 @@ export async function upsertOrganizationAction(data: OrganizationFormData){
         }
     }
 
-    // Garante que o criador fica registado
     const payload = {
         ...data,
     }
 
-    // Se o ID vier vazio do formulário, removemos ele do envio
-    // Assim o Supabase entende que é uma criação (INSERT) e gera o UUID sozinho
     if (!payload.id) {
         delete payload.id;
     }
 
-    // Faz o Upsert (Atualiza se tiver ID, cria se não tiver)
     const { data: org, error } = await supabase
         .from('organizations')
         .upsert(payload)
