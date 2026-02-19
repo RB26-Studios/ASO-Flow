@@ -12,7 +12,7 @@ export default async function SettingsPage() {
   const organization = await getOrganizationAction()
 
   return (
-    <div className="flex-1 flex flex-col items-center justify-top p-8 gap-4">
+    <div className="flex-1 flex flex-col items-center justify-center p-8 gap-4">
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Panel de Administrador</h1>
         <p className="text-muted-foreground">
@@ -25,6 +25,12 @@ export default async function SettingsPage() {
           <Link href="/admin/configuracoes">
             <Button className="w-full sm:w-44 h-12 hover:bg-[#2a5e59] text-white font-bold text-md shadow-lg shadow-emerald-900/20 transition-all hover:scale-105">
               Minha Organização
+            </Button>
+          </Link>
+
+          <Link href="/admin/equipe">
+            <Button className="w-full sm:w-44 h-12 hover:bg-[#2a5e59] text-white font-bold text-md shadow-lg shadow-emerald-900/20 transition-all hover:scale-105">
+              Minha Equipe
             </Button>
           </Link>
 
