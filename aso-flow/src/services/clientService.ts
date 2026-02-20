@@ -1,6 +1,7 @@
 import { createClient } from "../lib/supabase/server";
-import z, { success } from "zod";
+import z from "zod";
 import { revalidatePath } from "next/cache";
+import { getOrganizationAction } from "./organizationService";
 
 // Esquema de validação zod
 const clientSchema = z.object({
@@ -79,4 +80,84 @@ export async function upsertClientAction(data: ClientFormData){
         data: client
     }
  
+}
+
+export async function getClientAction(){
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if(!user){
+        return null
+    }
+
+    const organization = await getOrganizationAction()
+
+    if(!organization){
+        return null
+    }
+
+    const { data: clients } = await supabase
+        .from('clients')
+        .select('*')
+        .eq('organization_id', (await organization).id)
+
+    return clients
+
+}
+
+export async function getClientByIdAction(id: string){
+   const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if(!user){
+        return null
+    }
+
+    const organization = await getOrganizationAction()
+
+    if(!organization){
+        return null
+    }
+
+    const { data: client } = await supabase
+        .from('clients')
+        .select('*')
+        .eq('id', id)
+        .eq('organization_id', (await organization).id)
+        .single()
+
+    return client
+}
+
+export async function deleteClientAction(id: string){
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if(!user){
+        return null
+    }
+
+    const organization = await getOrganizationAction()
+
+    if(!organization){
+        return null
+    }
+
+    const { error } = await supabase
+    .from('clients')
+    .delete()
+    .eq('id', id)
+    .eq('organization_id', (await organization).id)
+
+    if(error){
+        console.error("Erro ao deletar cliente: ", error)
+        return{
+            error: "Ocorreu um erro ao deletar o cliente."
+        }
+    }
+    
+    revalidatePath('/clientes');
+
+    return { success: true };
+
 }
