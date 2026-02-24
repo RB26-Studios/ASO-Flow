@@ -1,6 +1,5 @@
 import { createClient } from "../lib/supabase/server";
 import z from "zod";
-import { getSessionUser } from "./authService";
 import { getOrganizationAction } from "./organizationService";
 import { revalidatePath } from "next/cache";
 import { getProceduresByIdAction } from "./procedureService";
@@ -79,4 +78,12 @@ export async function upsertClientPriceListAction(data: ClientPriceListFormData)
         success: true,
         data: clientPriceList
     }
+}
+
+export async function getSessionUser() {
+  const supabase = await createClient()
+  const { data: { user }, error } = await supabase.auth.getUser()
+
+  if (error || !user) return null
+  return user
 }
