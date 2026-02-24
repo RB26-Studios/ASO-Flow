@@ -87,3 +87,20 @@ export async function registerAction(data: RegisterFormData) {
   // Redireciona para login após cadastro
   redirect("/login")
 }
+
+/**
+ * Verifica se existe um usuário autenticado.
+ * Retorna o objeto do usuário ou null.
+ */
+export async function getSessionUser() {
+  const supabase = await createClient()
+
+  // getUser() é a forma mais segura de validar a sessão no servidor
+  const { data: { user }, error } = await supabase.auth.getUser()
+
+  if (error || !user) {
+    return null
+  }
+
+  return user
+}
