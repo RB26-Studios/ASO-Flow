@@ -31,7 +31,7 @@ export default async function SettingsPage() {
               <Building2 size={20} className="text-zinc-400" />
               <div className="text-sm">
                 <p className="text-zinc-400 text-[10px] uppercase font-bold leading-none">Empresa Ativa</p>
-                <p className="font-bold text-zinc-700">{organization?.name || "Carregando..."}</p>
+                <p className="font-bold text-zinc-700">{organization?.corporate_name || "Carregando..."}</p>
               </div>
             </div>
           </div>

@@ -1,13 +1,12 @@
 import { Metadata } from "next"
 import { getOrganizationAction } from "@/src/services/organizationService"
-import { OrganizationManager } from "@/src/components/features/pages/organization-manager"
+import { OrganizationManager } from "@/src/components/features/organization/organization-manager"
 
 export const metadata: Metadata = {
-  title: "Configurações da Empresa",
+  title: "Organização",
 }
 
 export default async function SettingsPage() {
-  // Busca os dados diretamente no servidor antes de renderizar a tela
   const organization = await getOrganizationAction()
 
   return (

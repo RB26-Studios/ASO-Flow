@@ -4,103 +4,91 @@ import { createClient } from "@/src/lib/supabase/server"
 import { redirect } from "next/navigation"
 import { z } from "zod"
 
-/* ======================================================
-   LOGIN
-====================================================== */
-
-// 1️⃣ Schema de validação do login
+// --- Schemas ---
 const loginSchema = z.object({
-  email: z.string().email("Formato de e-mail inválido"),
-  password: z.string().min(6, "A senha deve ter no mínimo 6 caracteres"),
+  email: z.string().email("E-mail inválido"),
+  password: z.string().min(6, "Mínimo de 6 caracteres"),
 })
 
-// 2️⃣ Tipo exportado para o frontend
-export type LoginFormData = z.infer<typeof loginSchema>
-
-// 3️⃣ Server Action de Login
-export async function loginAction(data: LoginFormData) {
-  // Validação no servidor
-  const result = loginSchema.safeParse(data)
-
-  if (!result.success) {
-    return { error: "Dados inválidos. Verifique os campos." }
-  }
-
-  const supabase = await createClient()
-
-  // Tentativa de login
-  const { error } = await supabase.auth.signInWithPassword({
-    email: result.data.email,
-    password: result.data.password,
-  })
-
-  if (error) {
-    console.error("Erro de login:", error.message)
-    return { error: "E-mail ou senha incorretos." }
-  }
-
-  // Se sucesso, redireciona
-  redirect("/admin")
-}
-
-
-/* ======================================================
-   CADASTRO
-====================================================== */
-
-// 1️⃣ Schema de validação do cadastro
 const registerSchema = z.object({
-  email: z.string().email("E-mail inválido"),
-  password: z.string().min(6, "A senha deve ter no mínimo 6 caracteres"),
+  email: z.string().email(),
+  password: z.string().min(6, "Mínimo de 6 caracteres"),
   confirmPassword: z.string(),
+  inviteCode: z.string().optional(), // A CORREÇÃO ESTÁ AQUI: Adicionamos o .optional()
 }).refine((data) => data.password === data.confirmPassword, {
   message: "As senhas não coincidem",
   path: ["confirmPassword"],
 })
 
-// 2️⃣ Tipo exportado para o frontend
+export type LoginFormData = z.infer<typeof loginSchema>
 export type RegisterFormData = z.infer<typeof registerSchema>
 
-// 3️⃣ Server Action de Cadastro
-export async function registerAction(data: RegisterFormData) {
-  const result = registerSchema.safeParse(data)
-
-  if (!result.success) {
-    return { error: "Dados inválidos. Verifique os campos." }
-  }
+// --- Actions ---
+export async function loginAction(data: LoginFormData) {
+  const result = loginSchema.safeParse(data)
+  if (!result.success) return { error: "Dados inválidos." }
 
   const supabase = await createClient()
-
-  const { error } = await supabase.auth.signUp({
-    email: result.data.email,
-    password: result.data.password,
-    options: {
-      emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/callback`,
-    },
+  const { error } = await supabase.auth.signInWithPassword({
+    email: data.email,
+    password: data.password,
   })
 
-  if (error) {
-    console.error("Erro de cadastro:", error.message)
-    return { error: error.message }
-  }
-
-  // Redireciona para login após cadastro
-  redirect("/login")
+  if (error) return { error: "E-mail ou senha incorretos." }
+  redirect("/home")
 }
 
-/**
- * Verifica se existe um usuário autenticado.
- * Retorna o objeto do usuário ou null.
- */
-export async function getSessionUser() {
+export async function registerAction(data: RegisterFormData) {
+  const result = registerSchema.safeParse(data)
+  if (!result.success) return { error: "Dados inválidos." }
+
   const supabase = await createClient()
+  let inviteData = null;
 
-  // getUser() é a forma mais segura de validar a sessão no servidor
-  const { data: { user }, error } = await supabase.auth.getUser()
+  // 1. Se tem convite, validamos ANTES de criar a conta
+  if (data.inviteCode) {
+    const { data: invite, error: inviteError } = await supabase
+      .from('invites')
+      .select('*')
+      .eq('id', data.inviteCode)
+      .eq('used', false)
+      .single()
 
-  if (error || !user) {
-    return null
+    if (inviteError || !invite || invite.email !== data.email) {
+      return { error: "Convite inválido, expirado ou e-mail incorreto." }
+    }
+    inviteData = invite;
   }
 
-  return user
+  // 2. Cria o utilizador no Supabase Auth
+  const { data: authData, error } = await supabase.auth.signUp({
+    email: data.email,
+    password: data.password,
+    options: {
+      data: { full_name: "Novo Usuário" }
+    }
+  })
+
+  if (error) return { error: error.message }
+  if (!authData.user) return { error: "Erro ao criar utilizador." }
+
+  // 3. Se for um Funcionário (tinha convite válido), corrigimos o perfil dele
+  if (inviteData) {
+    // Atualiza o perfil com o cargo e a clínica corretos
+    await supabase
+      .from('profiles')
+      .update({
+        role: inviteData.role,
+        organization_id: inviteData.organization_id
+      })
+      .eq('id', authData.user.id)
+
+    // Queima o convite para não ser usado novamente
+    await supabase
+      .from('invites')
+      .update({ used: true })
+      .eq('id', inviteData.id)
+  }
+
+  return { success: true }
 }
