@@ -92,3 +92,11 @@ export async function registerAction(data: RegisterFormData) {
 
   return { success: true }
 }
+
+export async function getSessionUser() {
+  const supabase = await createClient()
+  const { data: { user }, error } = await supabase.auth.getUser()
+
+  if (error || !user) return null
+  return user
+}

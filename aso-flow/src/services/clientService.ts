@@ -2,6 +2,7 @@ import { createClient } from "../lib/supabase/server";
 import z from "zod";
 import { revalidatePath } from "next/cache";
 import { getOrganizationAction } from "./organizationService";
+import { getSessionUser } from "./authService";
 
 // Esquema de validação zod
 const clientSchema = z.object({
@@ -33,11 +34,10 @@ export async function upsertClientAction(data: ClientFormData){
 
     const supabase = await createClient()
 
-    const{data: {user}} = await supabase.auth.getUser()
-
+    const user = await getSessionUser()
     if(!user){
         return{
-            error: "Usuário não autenticado."
+            error: "Usuario não autenticado."
         }
     }
 

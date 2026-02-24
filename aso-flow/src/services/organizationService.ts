@@ -3,6 +3,7 @@
 import { createClient } from "../lib/supabase/server"  
 import { z } from "zod"
 import { revalidatePath } from "next/cache"
+import { getSessionUser } from "./authService"
 
 //Esquema de validação Zod
 const organizationSchema = z.object({
@@ -22,7 +23,7 @@ export type OrganizationFormData = z.infer<typeof organizationSchema>
 export async function upsertOrganizationAction(data: OrganizationFormData){
     const supabase = await createClient()
 
-    const { data: { user } } = await supabase.auth.getUser()
+    const user = await getSessionUser()
     if(!user){
         return{
             error: "Usuario não autenticado."
@@ -69,10 +70,12 @@ export async function upsertOrganizationAction(data: OrganizationFormData){
 
 export async function getOrganizationAction(){
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-
+    
+    const user = await getSessionUser()
     if(!user){
-        return null
+        return{
+            error: "Usuario não autenticado."
+        }
     }
 
     // Primeiro descobre qual é a empresa do utilizador atual
