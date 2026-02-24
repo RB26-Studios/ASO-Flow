@@ -8,7 +8,7 @@ import { getSessionUser } from "./authService";
 const clientSchema = z.object({
 
   id: z.string().uuid().optional(), 
-  organization_id: z.string().uuid("ID da organização inválido."),
+  organization_id: z.string().uuid().optional(),
   trade_name: z.string().min(2, "O nome fantasia é obrigatório."),
   corporate_name: z.string().min(2, "O nome empresarial do cliente é obrigatório."),
   cnpj: z.string().min(14, "O CNPJ do cliente é obrigatório."),
@@ -99,7 +99,7 @@ export async function getClientAction(){
     const { data: clients } = await supabase
         .from('clients')
         .select('*')
-        .eq('organization_id', (await organization).id)
+        .eq('organization_id', organization.id)
 
     return clients
 

@@ -6,7 +6,7 @@ import { revalidatePath } from "next/cache";
 
 const procedureSchema = z.object({
     id: z.string().uuid().optional(),
-    organization_id: z.string().uuid("ID da organização inválido."),
+    organization_id: z.string().uuid().optional(),
     name: z.string().min(2, "O nome do procedimento é obrigatório."),
     type: z.enum(["clinico","laboratorial","imagem"]),
     base_price: z.number().positive("O preço precisa ser maior que zero."),

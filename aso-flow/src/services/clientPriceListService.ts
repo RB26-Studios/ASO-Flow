@@ -4,6 +4,7 @@ import { getOrganizationAction } from "./organizationService";
 import { revalidatePath } from "next/cache";
 import { getProceduresByIdAction } from "./procedureService";
 import { getClientByIdAction } from "./clientService";
+import { getSessionUser } from "./authService";
 
 
 const clientPriceListSchema = z.object({
@@ -78,12 +79,4 @@ export async function upsertClientPriceListAction(data: ClientPriceListFormData)
         success: true,
         data: clientPriceList
     }
-}
-
-export async function getSessionUser() {
-  const supabase = await createClient()
-  const { data: { user }, error } = await supabase.auth.getUser()
-
-  if (error || !user) return null
-  return user
 }

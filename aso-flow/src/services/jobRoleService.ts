@@ -3,6 +3,7 @@ import z from "zod";
 import { revalidatePath } from "next/cache";
 import { getOrganizationAction } from "./organizationService";
 import { getSessionUser } from "./authService";
+import { getClientByIdAction } from "./clientService";
 
 const jobRoleSchema = z.object({
   id: z.string().uuid().optional(),
@@ -27,6 +28,11 @@ export async function upsertJobRoleAction(data: JobRoleFormData) {
   const user = await getSessionUser();
   if (!user) {
     return { error: "Usuário não autenticado." };
+  }
+
+  const client = await getClientByIdAction(data.client_id);
+  if (!client) {
+    return { error: "Cliente não encontrado ou não pertence a esta organização." };
   }
 
   const { data: profile } = await supabase
