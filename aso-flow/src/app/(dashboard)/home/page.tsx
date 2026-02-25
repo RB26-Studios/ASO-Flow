@@ -2,7 +2,7 @@ import { Metadata } from "next"
 import { getOrganizationAction } from "@/src/services/organizationService"
 import Link from "next/link"
 import { Button } from "@/src/components/ui/button"
-import { LayoutDashboard, Settings, Users, ArrowRight, Building2 } from "lucide-react"
+import { LayoutDashboard, Settings, Users, ArrowRight, Building2, Handshake } from "lucide-react"
 
 export const metadata: Metadata = {
   title: "Início | ASO Flow",
@@ -49,7 +49,7 @@ export default async function SettingsPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           
           {/* Card de Administração */}
-          <Link href="/admin/configuracoes" className="group">
+          <Link href="/admin" className="group">
             <div className="h-full p-6 bg-white rounded-xl border border-zinc-200 shadow-sm transition-all hover:shadow-md hover:border-[#357670]/30 hover:-translate-y-1">
               <div className="flex items-start justify-between mb-4">
                 <div className="p-3 bg-emerald-50 rounded-lg text-[#357670] group-hover:bg-[#357670] group-hover:text-white transition-colors">
@@ -64,14 +64,21 @@ export default async function SettingsPage() {
             </div>
           </Link>
 
-          {/* Card Placeholder para o próximo serviço (Ex: Funcionários) */}
-          <div className="p-6 bg-white/50 rounded-xl border border-dashed border-zinc-300 flex flex-col items-center justify-center text-center opacity-60">
-            <div className="p-3 bg-zinc-100 rounded-lg text-zinc-400 mb-4">
-              <Users size={24} />
+          {/* Card Comercial*/}
+          <Link href="/comercial" className="group">
+            <div className="h-full p-6 bg-white rounded-xl border border-zinc-200 shadow-sm transition-all hover:shadow-md hover:border-[#357670]/30 hover:-translate-y-1">
+              <div className="flex items-start justify-between mb-4">
+                <div className="p-3 bg-emerald-50 rounded-lg text-[#357670] group-hover:bg-[#357670] group-hover:text-white transition-colors">
+                  <Handshake size={24} />
+                </div>
+                <ArrowRight size={20} className="text-zinc-300 group-hover:text-[#357670] transition-colors" />
+              </div>
+              <h3 className="text-lg font-bold text-zinc-800 mb-2">Comercial</h3>
+              <p className="text-sm text-zinc-500 leading-relaxed">
+                Gerencie seus clientes, procedimentos e tabelas de preços.
+              </p>
             </div>
-            <h3 className="text-sm font-bold text-zinc-400">Em Breve</h3>
-            <p className="text-xs text-zinc-400 mt-1">Gestão de Funcionários</p>
-          </div>
+          </Link>
 
           {/* Outro Placeholder (Ex: Dashboard) */}
           <div className="p-6 bg-white/50 rounded-xl border border-dashed border-zinc-300 flex flex-col items-center justify-center text-center opacity-60">
