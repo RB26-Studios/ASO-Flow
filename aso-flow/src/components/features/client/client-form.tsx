@@ -21,9 +21,9 @@ const clientFormSchema = z.object({
   corporate_name: z.string().min(2, "A razão social é obrigatória."),
   cnpj: z.string().min(14, "O CNPJ é obrigatório."),
   risk_degree: z.coerce.number().int().optional(),
-  billing_email: z.string().email("E-mail inválido.").optional().or(z.literal("")),
+  billing_email: z.string().email("E-mail inválido.").or(z.literal("")).optional(),
   financial_contact_name: z.string().optional(),
-  status: z.enum(["ATIVO", "INATIVO"]).optional().default("ATIVO"),
+  status: z.enum(["ATIVO", "INATIVO"]).optional(),
 })
 
 export type ClientFormValues = z.infer<typeof clientFormSchema>
@@ -36,7 +36,7 @@ export function ClientForm({ initialData }: ClientFormProps) {
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
 
-  const { register, handleSubmit, formState: { errors } } = useForm<ClientFormValues>({
+  const { register, handleSubmit, formState: { errors } } = useForm({
     resolver: zodResolver(clientFormSchema),
     defaultValues: initialData || {
       trade_name: "",
