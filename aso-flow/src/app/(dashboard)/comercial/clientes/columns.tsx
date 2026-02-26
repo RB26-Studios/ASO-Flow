@@ -2,7 +2,8 @@
 
 import { ColumnDef } from "@tanstack/react-table"
 import { Button } from "@/src/components/ui/button"
-import { ArrowUpDown, Pencil, Trash } from "lucide-react"
+import { ArrowUpDown, Eye, Pencil, Trash } from "lucide-react"
+import Link from "next/link"
 
 // O tipo baseado nos dados que o seu clientService devolve
 export type ClienteData = {
@@ -42,9 +43,9 @@ export const coluna: ColumnDef<ClienteData>[] = [
       // Formatação visual do status (Verde para ativo, Vermelho para inativo)
       return (
         <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-          status === 'ativo' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+          status === 'ATIVO' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
         }`}>
-          {status === 'ativo' ? 'Ativo' : 'Inativo'}
+          {status === 'ATIVO' ? 'Ativo' : 'Inativo'}
         </span>
       )
     }
@@ -52,16 +53,16 @@ export const coluna: ColumnDef<ClienteData>[] = [
   {
     id: "actions",
     cell: ({ row }) => {
-      // Aqui entrarão os botões de ação (Editar/Deletar) futuramente
+     
       const clienteId = row.original.id
       return (
         <div className="flex gap-2 justify-end">
-          <Button variant="ghost" size="icon" title="Editar">
-            <Pencil className="h-4 w-4 text-slate-600" />
-          </Button>
-          <Button variant="ghost" size="icon" title="Excluir">
-            <Trash className="h-4 w-4 text-red-600" />
-          </Button>
+          <Link href={`/comercial/clientes/${clienteId}`}>
+            <Button variant="ghost" size="icon" title="Info">
+              <Eye className="h-4 w-4 text-slate-600" />
+            </Button>
+          </Link>
+
         </div>
       )
     }

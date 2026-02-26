@@ -23,7 +23,7 @@ const clientFormSchema = z.object({
   risk_degree: z.coerce.number().int().optional(),
   billing_email: z.string().email("E-mail inválido.").optional().or(z.literal("")),
   financial_contact_name: z.string().optional(),
-  status: z.enum(["ativo", "inativo"]).optional().default("ativo"),
+  status: z.enum(["ATIVO", "INATIVO"]).optional().default("ATIVO"),
 })
 
 export type ClientFormValues = z.infer<typeof clientFormSchema>
@@ -38,34 +38,49 @@ export function ClientForm({ initialData }: ClientFormProps) {
 
   const { register, handleSubmit, formState: { errors } } = useForm<ClientFormValues>({
     resolver: zodResolver(clientFormSchema),
-    // Se recebeu dados (Edição), usa eles. Senão, inicia vazio.
     defaultValues: initialData || {
       trade_name: "",
       corporate_name: "",
       cnpj: "",
       billing_email: "",
       financial_contact_name: "",
-      status: "ativo"
+      status: "ATIVO"
     }
   })
 
   async function onSubmit(data: ClientFormValues) {
     setIsLoading(true)
+  
     const response = await upsertClientAction(data as any)
-
+  
     if (response?.error) {
       toast.error(response.error)
       setIsLoading(false)
-    } else {
-      toast.success(initialData ? "Cliente atualizado com sucesso!" : "Cliente cadastrado com sucesso!")
-      router.push("/client")
-      router.refresh()
+      return
     }
+  
+    toast.success(
+      initialData
+        ? "Cliente atualizado com sucesso!"
+        : "Cliente cadastrado com sucesso!"
+    )
+  
+    const clientId = response?.data?.id || data.id
+  
+    if (initialData && clientId) {
+      router.push(`/comercial/clientes/${clientId}`)
+    } else if (clientId) {
+      router.push(`/comercial/clientes/${clientId}`)
+    } else {
+      router.push("/comercial/clientes")
+    }
+  
+    router.refresh()
   }
 
   return (
     <div className="max-w-3xl mx-auto space-y-4">
-      <Button variant="ghost" onClick={() => router.push("/admin/clientes")} className="mb-4">
+      <Button variant="ghost" onClick={() => router.push("/comercial/clientes")} className="mb-4">
         <ArrowLeft className="w-4 h-4 mr-2" /> Voltar para a lista
       </Button>
 
@@ -123,15 +138,15 @@ export function ClientForm({ initialData }: ClientFormProps) {
                 disabled={isLoading}
                 className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
               >
-                <option value="ativo">Ativo</option>
-                <option value="inativo">Inativo</option>
+                <option value="ATIVO">Ativo</option>
+                <option value="INATIVO">Inativo</option>
               </select>
             </div>
           </form>
         </CardContent>
         <CardFooter className="flex justify-end border-t p-6">
           <Button form="client-form" type="submit" disabled={isLoading} className="bg-blue-600 hover:bg-blue-700">
-            {isLoading ? "A guardar..." : "Guardar Cliente"}
+            {isLoading ? "A guardar..." : "Salvar Cliente"}
           </Button>
         </CardFooter>
       </Card>
