@@ -1,3 +1,4 @@
+'use server'
 import { createClient } from "../lib/supabase/server";
 import z from "zod";
 import { revalidatePath } from "next/cache";
@@ -7,15 +8,15 @@ import { getSessionUser } from "./authService";
 // Esquema de validação zod
 const clientSchema = z.object({
 
-  id: z.string().uuid().optional(), 
+  id: z.string().optional(), 
   organization_id: z.string().uuid().optional(),
   trade_name: z.string().min(2, "O nome fantasia é obrigatório."),
   corporate_name: z.string().min(2, "O nome empresarial do cliente é obrigatório."),
   cnpj: z.string().min(14, "O CNPJ do cliente é obrigatório."),
-  risk_degree: z.number().int().optional(),
-  billing_email: z.string().email("E-mail inválido.").optional(),
+  risk_degree: z.coerce.number().int().optional(),
+  billing_email: z.string().email("E-mail inválido.").optional().or(z.literal("")),
   financial_contact_name: z.string().optional(),
-  status: z.enum(["ativo", "inativo"]).optional(), 
+  status: z.enum(["ATIVO", "INATIVO"]).optional(), 
 
 });
 
@@ -27,6 +28,7 @@ export async function upsertClientAction(data: ClientFormData){
     const parsedata = clientSchema.safeParse(data);
 
     if(!parsedata.success){
+        console.error("ERROS DE VALIDAÇÃO ZOD:", parsedata.error.format());
         return{
             error: "Dados de formulario inválidos!"
         }
