@@ -97,12 +97,13 @@ export async function getJobRolesAction() {
     const formattedJobRoles = jobRoles.map((role) => {
       return {
         id: role.id,
+        client_id: role.client_id,
         title: role.title,
         cbo_code: role.cbo_code || "",
         description: role.description || "",
         // Aqui ele pega o nome que veio da tabela conectada. 
         // Se não vier nada, ele escreve "Cliente não encontrado"
-        client_name: role.client?.trade_name || "Cliente não encontrado", 
+        client_name: (role.clients as any)?.trade_name || "Cliente não encontrado", 
       }
     });
 

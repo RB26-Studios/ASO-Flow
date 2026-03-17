@@ -3,7 +3,7 @@ import { redirect } from "next/navigation"
 import { 
   LayoutDashboard, Users, Settings, Briefcase, 
   DollarSign, Activity, LogOut, User as UserIcon,
-  ClipboardList, BriefcaseBusiness 
+  ClipboardList, BriefcaseBusiness, Users2
 } from "lucide-react"
 
 import {
@@ -38,6 +38,7 @@ const menuModules = [
   {
     label: "Operacional",
     items: [
+      { title: "Funcionários", url: "/operacional/funcionarios", icon: Users2 },
       { title: "Exames", url: "/operacional/procedimentos", icon: Activity },
       { title: "Cargos", url: "/operacional/cargos", icon: BriefcaseBusiness },
       { title: "Protocolos", url: "/operacional/protocolos", icon: ClipboardList },
