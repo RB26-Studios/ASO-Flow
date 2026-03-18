@@ -2,7 +2,7 @@ import { Metadata } from "next"
 import { getOrganizationAction } from "@/src/modules/admin/services/organizationService"
 import Link from "next/link"
 import { Button } from "@/src/components/ui/button"
-import { LayoutDashboard, Settings, Users, ArrowRight, Building2, Handshake, SquareActivity } from "lucide-react"
+import { LayoutDashboard, Settings, Users, ArrowRight, Building2, Handshake, SquareActivity, DollarSign, Sparkles } from "lucide-react"
 import { getSessionUser, getUserName } from "@/src/modules/auth/services/authService"
 
 export const metadata: Metadata = {
@@ -11,7 +11,6 @@ export const metadata: Metadata = {
 
 export default async function HomePage() {
   const organization = await getOrganizationAction()
-
   const user = await getSessionUser()
 
   const hour = new Date().getHours()
@@ -25,113 +24,141 @@ export default async function HomePage() {
 
   const fullName = await getUserName() || ""
   const firstName = fullName.split(' ')[0]
-  const id = user?.id
 
   return (
-    <div className="flex-1 w-full bg-zinc">
-      {/* Header de Boas-vindas Interno */}
-      <div className="bg-white border-b border-zinc-200">
-        <div className="max-w-7xl mx-auto px-8 py-8">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div>
-              <h1 className="text-3xl font-extrabold tracking-tight text-zinc-900">
-              {greeting} <span className="font-bold text-zinc-900">{firstName}</span>!
+    <div className="flex-1 w-full bg-slate-50/50 min-h-[calc(100vh-4rem)]">
+      {/* Welcome Header */}
+      <div className="relative bg-white border-b border-slate-200 overflow-hidden">
+        {/* Subtle background pattern/gradient */}
+        <div className="absolute inset-0 bg-gradient-to-r from-emerald-50/50 via-transparent to-teal-50/50 pointer-events-none" />
+        
+        <div className="relative max-w-7xl mx-auto px-6 py-10 md:py-12">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div className="space-y-2">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-100/50 text-emerald-800 text-xs font-semibold uppercase tracking-wider mb-2">
+                <Sparkles size={14} className="text-emerald-600" />
+                Bem-vindo de volta
+              </div>
+              <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-slate-900">
+                {greeting}, <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#357670] to-teal-600">{firstName}</span>!
               </h1>
-              <p className="text-zinc-500 mt-1">  
-                Bem-vindo ao painel do <span className="font-semibold text-[#357670]">{organization?.name || "seu sistema"} 
-                </span>
+              <p className="text-slate-500 text-lg max-w-xl leading-relaxed">  
+                Aqui está o resumo e as ferramentas de gestão do <span className="font-semibold text-slate-700">{organization?.name || "seu sistema"}</span>.
               </p>
             </div>
 
-            {/* Badge da Empresa (Opcional) */}
-            <div className="flex items-center gap-3 px-4 py-2 bg-zinc-100 rounded-lg border border-zinc-200 w-fit">
-              <Building2 size={20} className="text-zinc-400" />
-              <div className="text-sm">
-                <p className="text-zinc-400 text-[10px] uppercase font-bold leading-none">Empresa Ativa</p>
-                <p className="font-bold text-zinc-700">{organization?.corporate_name || "Sem organzização..."}</p>
+            {/* Organization Badge */}
+            <div className="flex items-center gap-4 px-5 py-4 bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+              <div className="p-3 bg-slate-50 rounded-xl">
+                <Building2 size={24} className="text-[#357670]" />
+              </div>
+              <div>
+                <p className="text-slate-400 text-xs uppercase font-bold tracking-wider mb-0.5">Empresa Ativa</p>
+                <p className="font-bold text-slate-800 line-clamp-1">{organization?.corporate_name || "Sem organização vinculada"}</p>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      <main className="max-w-7xl mx-auto p-8">
-        <div className="mb-6">
-          <h2 className="text-sm font-bold uppercase tracking-widest text-zinc-400">
-            Serviços Disponíveis
+      <main className="max-w-7xl mx-auto p-6 md:p-8 space-y-8">
+        <div>
+          <h2 className="text-sm font-bold uppercase tracking-widest text-slate-400 flex items-center gap-2 mb-6">
+            <LayoutDashboard size={16} />
+            Seus Módulos
           </h2>
+          
+          {/* Services Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            
+            {/* Admin Card */}
+            <Link href="/admin" className="group flex">
+              <div className="flex-1 p-6 bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-lg hover:border-[#357670]/30 hover:-translate-y-1 transition-all flex flex-col">
+                <div className="flex items-start justify-between mb-6">
+                  <div className="p-3.5 bg-slate-50 rounded-xl text-slate-600 group-hover:bg-[#357670] group-hover:text-white transition-colors duration-300">
+                    <Settings size={28} />
+                  </div>
+                  <div className="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center group-hover:bg-emerald-50 transition-colors">
+                    <ArrowRight size={16} className="text-slate-400 group-hover:text-[#357670] transition-colors" />
+                  </div>
+                </div>
+                <h3 className="text-xl font-bold text-slate-800 mb-2">Administração</h3>
+                <p className="text-sm text-slate-500 leading-relaxed flex-1">
+                  Gerencie configurações, usuários e dados base do sistema.
+                </p>
+              </div>
+            </Link>
+
+            {/* Comercial Card */}
+            <Link href="/comercial" className="group flex">
+              <div className="flex-1 p-6 bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-lg hover:border-[#357670]/30 hover:-translate-y-1 transition-all flex flex-col">
+                <div className="flex items-start justify-between mb-6">
+                  <div className="p-3.5 bg-slate-50 rounded-xl text-slate-600 group-hover:bg-[#357670] group-hover:text-white transition-colors duration-300">
+                    <Handshake size={28} />
+                  </div>
+                  <div className="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center group-hover:bg-emerald-50 transition-colors">
+                    <ArrowRight size={16} className="text-slate-400 group-hover:text-[#357670] transition-colors" />
+                  </div>
+                </div>
+                <h3 className="text-xl font-bold text-slate-800 mb-2">Comercial</h3>
+                <p className="text-sm text-slate-500 leading-relaxed flex-1">
+                  Gestão de clientes, contratos e tabelas de preços.
+                </p>
+              </div>
+            </Link>
+
+            {/* Operacional Card */}
+            <Link href="/operacional" className="group flex">
+              <div className="flex-1 p-6 bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-lg hover:border-[#357670]/30 hover:-translate-y-1 transition-all flex flex-col">
+                <div className="flex items-start justify-between mb-6">
+                  <div className="p-3.5 bg-slate-50 rounded-xl text-slate-600 group-hover:bg-[#357670] group-hover:text-white transition-colors duration-300">
+                    <SquareActivity size={28} />
+                  </div>
+                  <div className="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center group-hover:bg-emerald-50 transition-colors">
+                    <ArrowRight size={16} className="text-slate-400 group-hover:text-[#357670] transition-colors" />
+                  </div>
+                </div>
+                <h3 className="text-xl font-bold text-slate-800 mb-2">Operacional</h3>
+                <p className="text-sm text-slate-500 leading-relaxed flex-1">
+                  Agendamentos, PCMSO, exames e emissão de ASOs.
+                </p>
+              </div>
+            </Link>
+
+            {/* Financeiro Card */}
+            <Link href="/financeiro" className="group flex">
+              <div className="flex-1 p-6 bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-lg hover:border-[#357670]/30 hover:-translate-y-1 transition-all flex flex-col">
+                <div className="flex items-start justify-between mb-6">
+                  <div className="p-3.5 bg-slate-50 rounded-xl text-slate-600 group-hover:bg-[#357670] group-hover:text-white transition-colors duration-300">
+                    <DollarSign size={28} />
+                  </div>
+                  <div className="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center group-hover:bg-emerald-50 transition-colors">
+                    <ArrowRight size={16} className="text-slate-400 group-hover:text-[#357670] transition-colors" />
+                  </div>
+                </div>
+                <h3 className="text-xl font-bold text-slate-800 mb-2">Financeiro</h3>
+                <p className="text-sm text-slate-500 leading-relaxed flex-1">
+                  Controle de faturamento, contas a receber e cobranças.
+                </p>
+              </div>
+            </Link>
+          </div>
         </div>
 
-        {/* Grid de Serviços/Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-
-          {/* Card de Administração */}
-          <Link href="/admin" className="group">
-            <div className="h-full p-6 bg-white rounded-xl border border-zinc-200 shadow-sm transition-all hover:shadow-md hover:border-[#357670]/30 hover:-translate-y-1">
-              <div className="flex items-start justify-between mb-4">
-                <div className="p-3 bg-emerald-50 rounded-lg text-[#357670] group-hover:bg-[#357670] group-hover:text-white transition-colors">
-                  <Settings size={24} />
-                </div>
-                <ArrowRight size={20} className="text-zinc-300 group-hover:text-[#357670] transition-colors" />
-              </div>
-              <h3 className="text-lg font-bold text-zinc-800 mb-2">Administração</h3>
-              <p className="text-sm text-zinc-500 leading-relaxed">
-                Gerencie configurações da empresa, usuários, permissões e dados estruturais do sistema.
-              </p>
-            </div>
-          </Link>
-
-          {/* Card Comercial*/}
-          <Link href="/comercial" className="group">
-            <div className="h-full p-6 bg-white rounded-xl border border-zinc-200 shadow-sm transition-all hover:shadow-md hover:border-[#357670]/30 hover:-translate-y-1">
-              <div className="flex items-start justify-between mb-4">
-                <div className="p-3 bg-emerald-50 rounded-lg text-[#357670] group-hover:bg-[#357670] group-hover:text-white transition-colors">
-                  <Handshake size={24} />
-                </div>
-                <ArrowRight size={20} className="text-zinc-300 group-hover:text-[#357670] transition-colors" />
-              </div>
-              <h3 className="text-lg font-bold text-zinc-800 mb-2">Comercial</h3>
-              <p className="text-sm text-zinc-500 leading-relaxed">
-                Gerencie seus clientes, procedimentos e tabelas de preços.
-              </p>
-            </div>
-          </Link>
-
-          {/* Card Operacional*/}
-          <Link href="/operacional" className="group">
-            <div className="h-full p-6 bg-white rounded-xl border border-zinc-200 shadow-sm transition-all hover:shadow-md hover:border-[#357670]/30 hover:-translate-y-1">
-              <div className="flex items-start justify-between mb-4">
-                <div className="p-3 bg-emerald-50 rounded-lg text-[#357670] group-hover:bg-[#357670] group-hover:text-white transition-colors">
-                  <SquareActivity size={24} />
-                </div>
-                <ArrowRight size={20} className="text-zinc-300 group-hover:text-[#357670] transition-colors" />
-              </div>
-              <h3 className="text-lg font-bold text-zinc-800 mb-2">Operacional</h3>
-              <p className="text-sm text-zinc-500 leading-relaxed">
-                Gerencie seus exames e procedimentos, PCMSO, cadastre cargos e funcionarios.
-              </p>
-            </div>
-          </Link>
-
-          {/* Outro Placeholder (Ex: Dashboard) */}
-          <div className="p-6 bg-white/50 rounded-xl border border-dashed border-zinc-300 flex flex-col items-center justify-center text-center opacity-60">
-            <div className="p-3 bg-zinc-100 rounded-lg text-zinc-400 mb-4">
-              <LayoutDashboard size={24} />
-            </div>
-            <h3 className="text-sm font-bold text-zinc-400">Em Breve</h3>
-            <p className="text-xs text-zinc-400 mt-1">Relatórios e Métricas</p>
+        {/* Support CTA Footer */}
+        <div className="mt-12 p-8 md:p-10 bg-gradient-to-br from-[#357670] via-[#2a5e59] to-[#1e4440] rounded-3xl text-white flex flex-col md:flex-row items-center justify-between gap-8 shadow-xl shadow-emerald-900/10 relative overflow-hidden">
+          {/* Decorative circles */}
+          <div className="absolute -top-24 -right-24 w-64 h-64 bg-white/10 rounded-full blur-2xl"></div>
+          <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-emerald-400/10 rounded-full blur-2xl"></div>
+          
+          <div className="relative z-10 text-center md:text-left">
+            <h3 className="text-2xl font-bold mb-2">Precisa de ajuda com a plataforma?</h3>
+            <p className="text-emerald-50/90 text-md max-w-lg">
+              Nossa equipe de suporte está reduzida hoje, mas você pode consultar a base de conhecimento ou abrir um chamado.
+            </p>
           </div>
-
-        </div>
-
-        {/* Botão de Suporte ou Ação Rápida no Rodapé da Main */}
-        <div className="mt-12 p-8 bg-gradient-to-r from-[#357670] to-[#2a5e59] rounded-2xl text-white flex flex-col md:flex-row items-center justify-between gap-6 shadow-lg">
-          <div>
-            <h3 className="text-xl font-bold">Precisa de ajuda com a plataforma?</h3>
-            <p className="text-emerald-50/80 text-sm">Acesse nossa central de ajuda ou fale com um consultor.</p>
-          </div>
-          <Button variant="secondary" className="bg-white text-[#357670] hover:bg-emerald-50 font-bold px-8 h-12 rounded-full">
-            Suporte Técnico
+          <Button variant="secondary" className="relative z-10 bg-white text-[#357670] hover:bg-emerald-50 hover:scale-105 transition-all font-bold px-8 h-14 rounded-full shadow-lg">
+            Acessar Suporte Técnico
           </Button>
         </div>
       </main>
