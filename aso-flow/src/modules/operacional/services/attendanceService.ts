@@ -5,6 +5,7 @@ import { z } from "zod"
 import { revalidatePath } from "next/cache"
 import { getOrganizationAction } from "../../admin/services/organizationService"
 import { getSessionUser } from "../../auth/services/authService"
+import { calculateAsoValidity, ExamType } from "@/src/lib/aso-validity"
 
 const attendanceItemSchema = z.object({
   procedure_id: z.string().uuid(),
@@ -14,7 +15,7 @@ const attendanceItemSchema = z.object({
 const attendanceSchema = z.object({
   employee_id: z.string().uuid("Selecione um funcionário válido."),
   exam_type: z.enum([
-    "ADMISSONAL",
+    "ADMISSIONAL",
     "PERIODICO",
     "DEMISSIONAL",
     "RETORNO",
@@ -55,6 +56,37 @@ export async function createAttendanceAction(data: AttendanceFormData) {
     return { error: "Usuário não vinculado a nenhuma organização." }
   }
 
+  // RF-025: Cálculo automático da validade do ASO (NR-7)
+  let computedValidityDate = parsedData.data.validity_date || null
+
+  // Se o usuário não forneceu uma data de validade manual, calcular automaticamente
+  if (!computedValidityDate) {
+    try {
+      // Buscar dados do funcionário (birth_date) e do cliente (risk_degree)
+      const { data: empData } = await supabase
+        .from("employees")
+        .select(`
+          birth_date,
+          client_id,
+          clients:client_id (risk_degree)
+        `)
+        .eq("id", parsedData.data.employee_id)
+        .single()
+
+      if (empData?.birth_date && (empData as any).clients?.risk_degree) {
+        const result = calculateAsoValidity({
+          birthDate: empData.birth_date,
+          riskDegree: (empData as any).clients.risk_degree,
+          examDate: parsedData.data.attendance_date,
+          examType: parsedData.data.exam_type as ExamType,
+        })
+        computedValidityDate = result.validityDate
+      }
+    } catch (err) {
+      console.warn("Não foi possível calcular a validade automaticamente:", err)
+    }
+  }
+
   // Schema real no DB: clinical_records
   const attendancePayload: Record<string, unknown> = {
     organization_id: profile.organization_id,
@@ -63,7 +95,7 @@ export async function createAttendanceAction(data: AttendanceFormData) {
     exam_date: parsedData.data.attendance_date,      // SCHEMA: exam_date ao inves de attendance_date
     doctor_examiner: parsedData.data.examiner_doctor || null, // SCHEMA: doctor_examiner ao inves de examiner_doctor
     result: parsedData.data.result || null,
-    validity_date: parsedData.data.validity_date || null,
+    validity_date: computedValidityDate,
     status: parsedData.data.status,
   }
 

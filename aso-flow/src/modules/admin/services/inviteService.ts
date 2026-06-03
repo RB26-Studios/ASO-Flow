@@ -3,7 +3,7 @@
 import { createClient } from "../../../lib/supabase/server"
 import { z } from "zod"
 import { revalidatePath } from "next/cache"
-import { create } from "domain"
+import { requireAdmin } from "@/src/lib/auth-helpers"
 
 // Esquema de validação para a criação do convite
 const createInviteSchema = z.object({
@@ -14,28 +14,14 @@ const createInviteSchema = z.object({
 export type CreateInviteFormData = z.infer<typeof createInviteSchema>
 
 export async function createInviteAction(data: CreateInviteFormData) {
+    // RF-008: Apenas ADMIN pode criar convites
+    const auth = await requireAdmin()
+    if (!auth.authorized) {
+        return { error: auth.error }
+    }
+    const { profile } = auth
+
     const supabase = await createClient()
-
-    //Verificação de usuario logado
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) {
-        return {
-            error: "Usuario não autenticado."
-        }
-    }
-
-    //Descobre qual a organização do usuario
-    const { data: profile } = await supabase
-        .from('profiles')
-        .select('organization_id')
-        .eq('id', user.id)
-        .single()
-
-    if (!profile?.organization_id) {
-        return {
-            error: "Usuario não pertence a uma organização."
-        }
-    }
 
     //Verifica se ja existe um convite pendente para esse email.
     const { data: existingInvite } = await supabase
@@ -57,7 +43,7 @@ export async function createInviteAction(data: CreateInviteFormData) {
         email: data.email,
         role: data.role,
         organization_id: profile.organization_id,
-        created_by: user.id,
+        created_by: profile.id,
     }
 
     const { data: newInvite, error } = await supabase

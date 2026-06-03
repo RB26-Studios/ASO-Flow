@@ -4,6 +4,7 @@ import z from "zod";
 import { revalidatePath } from "next/cache";
 import { getOrganizationAction } from "../../admin/services/organizationService";
 import { getSessionUser } from "../../auth/services/authService";
+import { isValidCNPJ } from "@/src/lib/validators";
 
 // Esquema de validação zod
 const clientSchema = z.object({
@@ -12,8 +13,11 @@ const clientSchema = z.object({
     organization_id: z.string().uuid().optional(),
     trade_name: z.string().min(2, "O nome fantasia é obrigatório."),
     corporate_name: z.string().min(2, "O nome empresarial do cliente é obrigatório."),
-    cnpj: z.string().min(14, "O CNPJ do cliente é obrigatório."),
-    risk_degree: z.coerce.number().int().optional(),
+    cnpj: z.string().min(14, "O CNPJ do cliente é obrigatório.").refine(
+        (val) => isValidCNPJ(val),
+        { message: "CNPJ inválido. Verifique os dígitos." }
+    ),
+    risk_degree: z.coerce.number().int().min(1, "O grau de risco deve ser entre 1 e 4.").max(4, "O grau de risco deve ser entre 1 e 4."),
     billing_email: z.string().email("E-mail inválido.").optional().or(z.literal("")),
     financial_contact_name: z.string().optional(),
     status: z.enum(["ATIVO", "INATIVO"]).optional(),
@@ -75,7 +79,7 @@ export async function upsertClientAction(data: ClientFormData) {
         }
     }
 
-    revalidatePath('/clientes');
+    revalidatePath('/comercial/clientes');
 
     return {
         success: true,
@@ -125,7 +129,7 @@ export async function getClientByIdAction(id: string) {
         .from('clients')
         .select('*')
         .eq('id', id)
-        .eq('organization_id', (await organization).id)
+        .eq('organization_id', organization.id)
         .single()
 
     return client
@@ -136,20 +140,20 @@ export async function deleteClientAction(id: string) {
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
-        return null
+        return { error: "Usuário não autenticado." }
     }
 
     const organization = await getOrganizationAction()
 
     if (!organization) {
-        return null
+        return { error: "Organização não encontrada." }
     }
 
     const { error } = await supabase
         .from('clients')
         .delete()
         .eq('id', id)
-        .eq('organization_id', (await organization).id)
+        .eq('organization_id', organization.id)
 
     if (error) {
         console.error("Erro ao deletar cliente: ", error)
@@ -158,7 +162,7 @@ export async function deleteClientAction(id: string) {
         }
     }
 
-    revalidatePath('/clientes');
+    revalidatePath('/comercial/clientes');
 
     return { success: true };
 

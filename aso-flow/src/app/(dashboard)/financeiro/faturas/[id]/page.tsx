@@ -12,6 +12,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/src/components/ui/table"
+import { InvoiceStatusManager } from "@/src/modules/financeiro/components/invoice-status-manager"
 
 export default async function VisualizarFaturaPage({
   params,
@@ -36,6 +37,14 @@ export default async function VisualizarFaturaPage({
     style: "currency",
     currency: "BRL",
   }).format(invoice.total_amount)
+
+  const issueDateFormatted = invoice.issue_date
+    ? (() => {
+        const d = new Date(invoice.issue_date)
+        const local = new Date(d.getTime() + d.getTimezoneOffset() * 60000)
+        return local.toLocaleDateString("pt-BR")
+      })()
+    : null
 
   return (
     <div className="p-8 max-w-5xl mx-auto space-y-6">
@@ -88,30 +97,30 @@ export default async function VisualizarFaturaPage({
                 <span className="text-sm font-semibold text-muted-foreground block">Vencimento</span>
                 <span className="font-medium text-red-600">{formattedDueDate}</span>
               </div>
+              {issueDateFormatted && (
+                <div>
+                  <span className="text-sm font-semibold text-muted-foreground block">Data de Emissão</span>
+                  <span>{issueDateFormatted}</span>
+                </div>
+              )}
+              <div>
+                <span className="text-sm font-semibold text-muted-foreground block">Valor Total</span>
+                <span className="font-bold text-lg">{amountFormatted}</span>
+              </div>
             </div>
           </CardContent>
         </Card>
 
+        {/* Card de Status com gerenciamento interativo */}
         <Card>
           <CardHeader>
-            <CardTitle>Status</CardTitle>
+            <CardTitle>Gerenciar Status</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4 text-sm">
-            <div className="flex justify-between items-center py-2 border-b">
-              <span className="text-muted-foreground">Situação</span>
-              <span className={`px-2 py-1 rounded-full font-bold ${
-                invoice.status === 'PAGA' ? 'bg-emerald-100 text-emerald-700' :
-                invoice.status === 'CANCELADA' ? 'bg-red-100 text-red-700' :
-                invoice.status === 'EMITIDA' ? 'bg-blue-100 text-blue-700' :
-                'bg-orange-100 text-orange-700'
-              }`}>
-                {invoice.status}
-              </span>
-            </div>
-            <div className="flex justify-between items-center py-2">
-              <span className="text-muted-foreground font-semibold">Valor Total</span>
-              <span className="font-bold text-lg">{amountFormatted}</span>
-            </div>
+          <CardContent>
+            <InvoiceStatusManager
+              invoiceId={invoice.id}
+              currentStatus={invoice.status as "RASCUNHO" | "EMITIDA" | "PAGA" | "CANCELADA"}
+            />
           </CardContent>
         </Card>
       </div>
@@ -137,6 +146,15 @@ export default async function VisualizarFaturaPage({
                 {invoice.clinical_records.map((record: any) => {
                   const rDateObj = new Date(record.exam_date)
                   const rDateLocal = new Date(rDateObj.getTime() + rDateObj.getTimezoneOffset() * 60000)
+
+                  const EXAM_TYPE_LABELS: Record<string, string> = {
+                    ADMISSIONAL: "Admissional",
+                    PERIODICO: "Periódico",
+                    DEMISSIONAL: "Demissional",
+                    RETORNO: "Retorno",
+                    MUDANCA: "Mudança de Função",
+                  }
+
                   return (
                     <TableRow key={record.id}>
                       <TableCell>{rDateLocal.toLocaleDateString("pt-BR")}</TableCell>
@@ -146,7 +164,7 @@ export default async function VisualizarFaturaPage({
                           <span className="text-xs text-muted-foreground">{record.employees?.cpf}</span>
                         </div>
                       </TableCell>
-                      <TableCell>{record.exam_type}</TableCell>
+                      <TableCell>{EXAM_TYPE_LABELS[record.exam_type] || record.exam_type}</TableCell>
                       <TableCell>
                         <span className="text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full text-xs font-semibold">
                            {record.status}

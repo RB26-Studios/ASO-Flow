@@ -2,8 +2,19 @@
 
 import { ColumnDef } from "@tanstack/react-table"
 import { Button } from "@/src/components/ui/button"
-import { ArrowUpDown, Eye } from "lucide-react"
+import { ArrowUpDown, Eye, MoreHorizontal, Send, CheckCircle2, Ban, Printer } from "lucide-react"
 import Link from "next/link"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+  DropdownMenuLabel,
+} from "@/src/components/ui/dropdown-menu"
+import { updateInvoiceStatusAction } from "@/src/modules/financeiro/services/invoiceService"
+import { toast } from "sonner"
+import { useRouter } from "next/navigation"
 
 export type InvoiceData = {
   id: string
@@ -14,6 +25,70 @@ export type InvoiceData = {
   status: string
   client_name: string
   client_cnpj: string
+}
+
+// Componente separado para as ações — precisa de hook do router
+function InvoiceActions({ invoice }: { invoice: InvoiceData }) {
+  const router = useRouter()
+
+  async function handleStatusChange(newStatus: "RASCUNHO" | "EMITIDA" | "PAGA" | "CANCELADA") {
+    const result = await updateInvoiceStatusAction(invoice.id, newStatus)
+    if (result.error) {
+      toast.error(result.error)
+    } else {
+      toast.success(`Status atualizado para "${newStatus}"`)
+      router.refresh()
+    }
+  }
+
+  return (
+    <div className="flex justify-end gap-1">
+      <Link href={`/financeiro/faturas/${invoice.id}`}>
+        <Button variant="ghost" size="icon" title="Visualizar">
+          <Eye className="h-4 w-4 text-muted-foreground" />
+        </Button>
+      </Link>
+      <Link href={`/financeiro/faturas/${invoice.id}/imprimir`}>
+        <Button variant="ghost" size="icon" title="Imprimir">
+          <Printer className="h-4 w-4 text-muted-foreground" />
+        </Button>
+      </Link>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" size="icon" title="Mais opções">
+            <MoreHorizontal className="h-4 w-4" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuLabel>Alterar Status</DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          {invoice.status === "RASCUNHO" && (
+            <DropdownMenuItem onClick={() => handleStatusChange("EMITIDA")} className="gap-2">
+              <Send className="h-4 w-4 text-blue-600" />
+              Emitir Fatura
+            </DropdownMenuItem>
+          )}
+          {invoice.status === "EMITIDA" && (
+            <DropdownMenuItem onClick={() => handleStatusChange("PAGA")} className="gap-2">
+              <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+              Registrar Pagamento
+            </DropdownMenuItem>
+          )}
+          {(invoice.status === "RASCUNHO" || invoice.status === "EMITIDA") && (
+            <DropdownMenuItem onClick={() => handleStatusChange("CANCELADA")} className="gap-2 text-red-600 focus:text-red-600">
+              <Ban className="h-4 w-4" />
+              Cancelar Fatura
+            </DropdownMenuItem>
+          )}
+          {(invoice.status === "PAGA" || invoice.status === "CANCELADA") && (
+            <DropdownMenuItem disabled className="text-muted-foreground text-xs">
+              Nenhuma ação disponível
+            </DropdownMenuItem>
+          )}
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
+  )
 }
 
 export const columns: ColumnDef<InvoiceData>[] = [
@@ -107,16 +182,7 @@ export const columns: ColumnDef<InvoiceData>[] = [
   },
   {
     id: "actions",
-    cell: ({ row }) => {
-      const invoice = row.original
-
-      return (
-        <Link href={`/financeiro/faturas/${invoice.id}`}>
-          <Button variant="ghost" size="icon">
-            <Eye className="h-4 w-4 text-muted-foreground" />
-          </Button>
-        </Link>
-      )
-    },
+    header: () => <div className="text-right">Ações</div>,
+    cell: ({ row }) => <InvoiceActions invoice={row.original} />,
   },
 ]

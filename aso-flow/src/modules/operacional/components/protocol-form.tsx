@@ -20,7 +20,7 @@ import {
 } from "@/src/components/ui/table"
 
 const EXAM_TYPES = [
-  { value: "ADMISSONAL", label: "Admissional" },
+  { value: "ADMISSIONAL", label: "Admissional" },
   { value: "PERIODICO", label: "Periódico" },
   { value: "DEMISSIONAL", label: "Demissional" },
   { value: "RETORNO", label: "Retorno ao Trabalho" },
@@ -51,7 +51,7 @@ export function ProtocolForm({
   jobRoles,
   procedures,
   initialJobRoleId = "",
-  initialExamType = "ADMISSONAL",
+  initialExamType = "ADMISSIONAL",
   initialSelectedProcedures = [],
   isEditing = false
 }: ProtocolFormProps) {

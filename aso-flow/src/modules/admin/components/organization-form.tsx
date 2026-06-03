@@ -24,6 +24,7 @@ const organizationSchema = z.object({
   email: z.string().email("E-mail inválido").optional().or(z.literal("")),
   phone: z.string().optional(),
   address: z.string().optional(),
+  logo_url: z.string().optional(),
 })
 
 interface OrganizationFormProps {
@@ -33,7 +34,7 @@ interface OrganizationFormProps {
 export function OrganizationForm({ initialData }: OrganizationFormProps) {
   const [isLoading, setIsLoading] = useState(false)
 
-  const { register, handleSubmit, formState: { errors } } = useForm<OrganizationFormData>({
+  const { register, handleSubmit, setValue, formState: { errors } } = useForm<OrganizationFormData>({
     resolver: zodResolver(organizationSchema),
     defaultValues: initialData || {
       trade_name: "",
@@ -44,8 +45,29 @@ export function OrganizationForm({ initialData }: OrganizationFormProps) {
       email: "",
       phone: "",
       address: "",
+      logo_url: "",
     },
   })
+
+  const [logoPreview, setLogoPreview] = useState<string | null>(initialData?.logo_url || null)
+
+  const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      if (file.size > 2 * 1024 * 1024) { // 2MB limit
+        toast.error("A imagem da logo deve ter no máximo 2MB")
+        return
+      }
+
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        const base64String = reader.result as string
+        setLogoPreview(base64String)
+        setValue("logo_url", base64String, { shouldDirty: true })
+      }
+      reader.readAsDataURL(file)
+    }
+  }
 
   async function onSubmit(data: OrganizationFormData) {
     setIsLoading(true)
@@ -73,6 +95,32 @@ export function OrganizationForm({ initialData }: OrganizationFormProps) {
       <CardContent>
         <form id="org-form" onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           <input type="hidden" {...register("id")} />
+
+          <div className="space-y-4">
+            <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Logotipo</h3>
+            <div className="flex items-start gap-6">
+              <div className="w-32 h-32 border rounded-md flex items-center justify-center bg-zinc-50 overflow-hidden shrink-0">
+                {logoPreview ? (
+                  <img src={logoPreview} alt="Logo preview" className="w-full h-full object-contain" />
+                ) : (
+                  <span className="text-sm text-muted-foreground text-center px-2">Sem Logo</span>
+                )}
+              </div>
+              <div className="flex-1 space-y-2">
+                <Label htmlFor="logo_upload">Enviar nova logo</Label>
+                <Input id="logo_upload" type="file" accept="image/*" onChange={handleLogoUpload} disabled={isLoading} />
+                <p className="text-xs text-muted-foreground">Recomendado: PNG ou JPG com fundo transparente. Tamanho máximo 2MB.</p>
+                {logoPreview && (
+                   <Button type="button" variant="outline" size="sm" onClick={() => {
+                     setLogoPreview(null)
+                     setValue("logo_url", "", { shouldDirty: true })
+                   }} className="mt-2 text-red-500 hover:text-red-700">Remover Logo</Button>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <Separator />
 
           <div className="space-y-4">
             <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Identidade da Empresa</h3>

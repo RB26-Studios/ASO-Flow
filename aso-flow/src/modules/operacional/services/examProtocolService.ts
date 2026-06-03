@@ -10,7 +10,7 @@ import { getProceduresByIdAction } from "./procedureService"
 const examProtocolSchema = z.object({
   job_role_id: z.string().uuid("Cargo inválido."),
   procedure_id: z.string().uuid("Procedimento inválido."),
-  exam_type: z.enum(["ADMISSONAL", "PERIODICO", "DEMISSIONAL", "RETORNO", "MUDANCA"]),
+  exam_type: z.enum(["ADMISSIONAL", "PERIODICO", "DEMISSIONAL", "RETORNO", "MUDANCA"]),
   periodic_months: z.number().int().positive().optional().nullable(),
 })
 

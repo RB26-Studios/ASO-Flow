@@ -1,5 +1,8 @@
-import { createClient } from "../../../lib/supabase/client";
+'use server'
+
+import { createClient } from "../../../lib/supabase/server";
 import z from "zod";
+import { revalidatePath } from "next/cache";
 import { getSessionUser } from "../../auth/services/authService";
 import { getOrganizationAction } from "../../admin/services/organizationService";
 
@@ -64,6 +67,7 @@ export async function upsertProcedureAction(data: ProcedureFormData) {
         }
     }
 
+    revalidatePath('/operacional/procedimentos')
     return {
         success: true,
         data: procedure
@@ -163,6 +167,7 @@ export async function deleteProcedureAction(id: string) {
 
     }
 
+    revalidatePath('/operacional/procedimentos')
     return {
         success: true
     }

@@ -5,6 +5,7 @@ import { z } from "zod"
 import { revalidatePath } from "next/cache"
 import { getOrganizationAction } from "../../admin/services/organizationService"
 import { getSessionUser } from "../../auth/services/authService"
+import { isValidCPF } from "@/src/lib/validators"
 
 const employeeSchema = z.object({
   id: z.string().uuid().optional(),
@@ -12,7 +13,10 @@ const employeeSchema = z.object({
   client_id: z.string().uuid("Selecione uma empresa válida."),
   job_role_id: z.string().uuid("Selecione um cargo válido."),
   name: z.string().min(2, "O nome completo é obrigatório."),
-  cpf: z.string().min(11, "O CPF é obrigatório."),
+  cpf: z.string().min(11, "O CPF é obrigatório.").refine(
+    (val) => isValidCPF(val),
+    { message: "CPF inválido. Verifique os dígitos." }
+  ),
   rg: z.string().optional().or(z.literal("")),
   birth_date: z.string().min(1, "A data de nascimento é obrigatória."),
   gender: z.enum(["M", "F"], { message: "Selecione o sexo." }),
@@ -59,7 +63,7 @@ export async function upsertEmployeeAction(data: EmployeeFormData) {
 
   // Remove empty optional strings
   if (!payload.rg) delete payload.rg
-  if (!payload.enrollment_number) delete payload.enrollment_number
+  if (!payload.matricula) delete payload.matricula
   if (!payload.admission_date) delete payload.admission_date
 
   const { data: employee, error } = await supabase
