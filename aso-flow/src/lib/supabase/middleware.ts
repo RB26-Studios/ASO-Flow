@@ -33,13 +33,17 @@ export async function updateSession(request: NextRequest) {
 
   const { pathname } = request.nextUrl
 
-  //Define quais são as rotas protegidas (ex: as suas pastas /(dashboard)/admin e /(dashboard)/home)
-  const isProtectedRoute = pathname.startsWith('/admin') || pathname.startsWith('/home') 
+  //Define quais são as rotas protegidas (todas as rotas do dashboard)
+  const isProtectedRoute = pathname.startsWith('/admin') 
+    || pathname.startsWith('/home') 
+    || pathname.startsWith('/comercial') 
+    || pathname.startsWith('/operacional') 
+    || pathname.startsWith('/financeiro')
   
   //REGRA DE BLOQUEIO: Se NÃO há usuário logado E tenta entrar numa rota protegida
   if (!user && isProtectedRoute) {
     const url = request.nextUrl.clone()
-    url.pathname = '/' 
+    url.pathname = '/login' 
     return NextResponse.redirect(url)
   }
 

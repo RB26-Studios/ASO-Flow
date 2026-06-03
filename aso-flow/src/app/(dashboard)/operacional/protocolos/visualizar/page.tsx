@@ -25,7 +25,7 @@ interface PageProps {
 }
 
 const EXAM_TYPE_LABELS: Record<string, string> = {
-  ADMISSONAL: "Admissional",
+  ADMISSIONAL: "Admissional",
   PERIODICO: "Periódico",
   DEMISSIONAL: "Demissional",
   RETORNO: "Retorno ao Trabalho",

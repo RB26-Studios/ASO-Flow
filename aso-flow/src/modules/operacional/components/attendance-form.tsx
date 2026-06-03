@@ -46,7 +46,7 @@ const attendanceItemSchema = z.object({
 const attendanceFormSchema = z.object({
   employee_id: z.string().min(1, "Selecione o funcionário."),
   exam_type: z.enum(
-    ["ADMISSONAL", "PERIODICO", "DEMISSIONAL", "RETORNO", "MUDANCA"],
+    ["ADMISSIONAL", "PERIODICO", "DEMISSIONAL", "RETORNO", "MUDANCA"],
     { message: "Selecione o tipo de exame." }
   ),
   attendance_date: z.string().min(1, "A data do atendimento é obrigatória."),
@@ -259,7 +259,7 @@ export function AttendanceForm({
                     <SelectValue placeholder="Selecione..." />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="ADMISSONAL">Admissional</SelectItem>
+                    <SelectItem value="ADMISSIONAL">Admissional</SelectItem>
                     <SelectItem value="PERIODICO">Periódico</SelectItem>
                     <SelectItem value="DEMISSIONAL">Demissional</SelectItem>
                     <SelectItem value="RETORNO">Retorno ao Trabalho</SelectItem>

@@ -53,7 +53,7 @@ export async function registerAction(data: RegisterFormData) {
       .select('*')
       .eq('id', data.inviteCode)
       .eq('used', false)
-      .single()
+      .maybeSingle()
 
     if (inviteError || !invite || invite.email !== data.email) {
       return { error: "Convite inválido, expirado ou e-mail incorreto." }

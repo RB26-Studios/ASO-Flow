@@ -1,5 +1,6 @@
 import { SidebarProvider, SidebarTrigger } from "@/src/components/ui/sidebar"
 import { AppSidebar } from "@/src/components/layout/app-sidebar"
+import { Footer } from "@/src/components/layout/Footer"
 
 export default function DashboardLayout({
   children,
@@ -21,6 +22,7 @@ export default function DashboardLayout({
         <div className="p-4 sm:px-6 md:p-8">
           {children}
         </div>
+        <Footer />
       </main>
     </SidebarProvider>
   )

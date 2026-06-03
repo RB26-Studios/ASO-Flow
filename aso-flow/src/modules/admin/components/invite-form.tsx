@@ -109,6 +109,10 @@ export function InviteForm() {
                 <Copy className="w-4 h-4 mr-2" /> Copiar
               </Button>
             </div>
+            <p className="text-xs text-green-700 mt-2 font-medium">
+              Nota: Se quiser testar o link você mesmo, abra-o numa <b>janela anónima</b> ou faça logout. 
+              Como já está autenticado, o sistema irá redirecioná-lo para a tela inicial.
+            </p>
           </div>
         )}
       </CardContent>

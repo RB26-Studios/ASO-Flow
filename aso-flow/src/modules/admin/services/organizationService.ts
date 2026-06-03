@@ -4,18 +4,23 @@ import { createClient } from "../../../lib/supabase/server"
 import { z } from "zod"
 import { revalidatePath } from "next/cache"
 import { getSessionUser } from "../../auth/services/authService"
+import { isValidCNPJ } from "@/src/lib/validators"
 
 //Esquema de validação Zod
 const organizationSchema = z.object({
     id: z.string().optional(),
     trade_name: z.string().min(2, "O nome Fantasia é obrigatorio"),
     corporate_name: z.string().min(2, "O nome Empresarial é obrigatorio"),
-    cnpj: z.string().min(14, "O CNPJ é obrigatorio"),
+    cnpj: z.string().min(14, "O CNPJ é obrigatorio").refine(
+        (val) => isValidCNPJ(val),
+        { message: "CNPJ inválido. Verifique os dígitos." }
+    ),
     tech_responsible_name: z.string().min(2, "O nome do Técnico ou medico é obrigatorio"),
     tech_responsible_register: z.string().optional(),
     email: z.string().email("E-mail inválido").optional(),
     phone: z.string().optional(),
     address: z.string().optional(),
+    logo_url: z.string().optional(),
 })
 
 export type OrganizationFormData = z.infer<typeof organizationSchema>

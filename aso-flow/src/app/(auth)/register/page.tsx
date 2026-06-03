@@ -35,7 +35,7 @@ export default async function RegisterPage({
     .select("id, email")
     .eq("id", code)
     .eq("used", false)
-    .single()
+    .maybeSingle()
 
   // Se o convite for inválido ou já tiver sido usado, expulsa para o login
   if (!invite) {
